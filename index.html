@@ -431,12 +431,12 @@
     .hist-scroll { overflow-x: visible; }
     .hist-table { min-width: 0; padding: 4px 0 0; }
     .hist-row.head { display: none; }
-    .hist-row:not(.head) { grid-template-columns: 1fr auto auto; grid-template-areas: "month month del" "spent scost esito"; gap: 10px; align-items: center; border: 1px solid var(--line); border-radius: 12px; padding: 11px 12px; margin-bottom: 8px; }
+    .hist-row:not(.head) { grid-template-columns: auto minmax(56px, 1fr) auto 26px; grid-template-areas: "month spent scost del"; gap: 8px; align-items: center; border: 1px solid var(--line); border-radius: 12px; padding: 9px 10px; margin-bottom: 8px; }
     .hist-row:not(.head) .month-cell { grid-area: month; justify-self: start; }
-    .hist-row:not(.head) .del { grid-area: del; justify-self: end; }
     .hist-row:not(.head) .spent-cell { grid-area: spent; }
-    .hist-row:not(.head) .hsc { grid-area: scost; text-align: right; }
-    .hist-row:not(.head) .flag { grid-area: esito; justify-self: end; }
+    .hist-row:not(.head) .hsc { grid-area: scost; text-align: right; font-weight: 700; }
+    .hist-row:not(.head) .flag { display: none; }
+    .hist-row:not(.head) .del { grid-area: del; justify-self: end; }
   }
 
   @media (max-width: 1080px) {
