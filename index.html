@@ -194,6 +194,8 @@
   .tab { flex: none; border: 1px solid var(--line-strong); background: var(--surface); color: var(--muted); padding: 8px 15px; border-radius: 999px; font-size: 13px; font-weight: 650; white-space: nowrap; box-shadow: var(--shadow-sm); transition: background .15s, color .15s, border-color .15s; }
   .tab:hover { color: var(--ink); border-color: var(--faint); }
   .tab.active { background: var(--accent); border-color: var(--accent); color: #fff; box-shadow: 0 8px 20px -8px color-mix(in srgb, var(--accent) 65%, transparent); }
+  .alloc-mini { display: none; }
+  .tab-ico { display: none; }
   .panel { display: none; }
   .panel.active { display: block; animation: fade .35s ease both; }
   .panel-sub { margin: 2px 4px 16px; font-size: 13px; color: var(--muted); }
@@ -460,6 +462,36 @@
     .row.has-acct .del { grid-column: 2 / 3; justify-self: end; }
     .saved-dot { display: none; }
   }
+  @media (max-width: 620px) {
+    /* Intestazione compatta */
+    .top-inner { padding-top: 9px; padding-bottom: 9px; gap: 10px; }
+    .mark { width: 34px; height: 34px; border-radius: 11px; font-size: 17px; }
+    .brand-txt h1 { font-size: 15px; }
+    .brand-txt p { font-size: 11px; }
+
+    /* Barra "assegnato" sotto l'intestazione */
+    .alloc-mini { display: flex; align-items: center; gap: 9px; padding: 0 clamp(14px, 3.5vw, 34px) 9px; }
+    .am-track { flex: 1; height: 6px; border-radius: 99px; background: var(--line); overflow: hidden; }
+    .am-track > span { display: block; height: 100%; width: 0; border-radius: 99px; background: var(--accent); transition: width .5s cubic-bezier(.2,.7,.2,1), background .3s; }
+    .am-pct { font-size: 11px; font-weight: 700; color: var(--muted); white-space: nowrap; }
+    .am-pct b { color: var(--ink); }
+
+    /* Schede -> barra di navigazione in basso */
+    .tabs { position: fixed; left: 0; right: 0; bottom: 0; top: auto; z-index: 50; margin: 0; max-width: none; padding: 6px 8px calc(8px + env(safe-area-inset-bottom, 0px)); gap: 4px; overflow: visible; background: color-mix(in srgb, var(--surface) 92%, transparent); backdrop-filter: blur(12px); border-top: 1px solid var(--line); }
+    .tab { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 6px 2px; border: 0; border-radius: 12px; background: transparent; box-shadow: none; color: var(--faint); font-size: 11px; font-weight: 600; }
+    .tab:hover { background: transparent; border: 0; color: var(--faint); }
+    .tab.active { background: transparent; color: var(--accent-ink); box-shadow: none; }
+    .tab-ico { display: block; width: 23px; height: 23px; }
+    .wrap { padding-bottom: 92px; }
+
+    /* Aree di tocco più grandi (~44px) */
+    .env-row input, .env-row select { padding-top: 11px; padding-bottom: 11px; }
+    .month-cell { padding-top: 11px; padding-bottom: 11px; }
+    .spent-cell .hsp { padding-top: 11px; padding-bottom: 11px; }
+    .add-row { padding: 12px; }
+    .menu-item { padding-top: 13px; padding-bottom: 13px; }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     *, .wrap { animation: none !important; transition: none !important; }
   }
@@ -499,10 +531,14 @@
       </div>
     </div>
   </div>
+  <div class="alloc-mini" id="allocMini">
+    <div class="am-track"><span id="allocMiniFill"></span></div>
+    <span class="am-pct"><b id="allocMiniPct">—</b> assegnato</span>
+  </div>
   <nav class="tabs" id="tabs">
-    <button class="tab" type="button" data-tab="panoramica">Panoramica</button>
-    <button class="tab" type="button" data-tab="mese">Il mese</button>
-    <button class="tab" type="button" data-tab="analisi">Analisi</button>
+    <button class="tab" type="button" data-tab="panoramica"><svg class="tab-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span class="tab-lbl">Panoramica</span></button>
+    <button class="tab" type="button" data-tab="mese"><svg class="tab-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 8V6a2 2 0 0 0-2-2H5a2 2 0 0 0 0 4h14a1 1 0 0 1 1 1v3"/><path d="M4 6v12a2 2 0 0 0 2 2h14a1 1 0 0 0 1-1v-3"/><path d="M17 13a1.5 1.5 0 0 0 0 4h4v-4z"/></svg><span class="tab-lbl">Il mese</span></button>
+    <button class="tab" type="button" data-tab="analisi"><svg class="tab-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m7 14 4-4 3 3 5-6"/></svg><span class="tab-lbl">Analisi</span></button>
   </nav>
 </header>
 
@@ -962,6 +998,13 @@
       ring.setAttribute("stroke-dasharray", filled.toFixed(2) + " " + (Cr - filled).toFixed(2));
       ring.setAttribute("stroke", liberoState === "ok" ? "var(--accent)" : (liberoState === "bad" ? "var(--crit)" : "var(--warn)"));
       document.getElementById("allocPct").textContent = (entrate > 0 ? Math.round(pctA * 100) : 0) + "%";
+    }
+    var amFill = document.getElementById("allocMiniFill");
+    if (amFill) {
+      var pa = entrate > 0 ? usciteTot / entrate : 0;
+      amFill.style.width = (Math.max(0, Math.min(1, pa)) * 100).toFixed(1) + "%";
+      amFill.style.background = liberoState === "ok" ? "var(--accent)" : (liberoState === "bad" ? "var(--crit)" : "var(--warn)");
+      document.getElementById("allocMiniPct").textContent = (entrate > 0 ? Math.round(pa * 100) : 0) + "%";
     }
 
     drawDonut([
