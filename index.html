@@ -302,18 +302,21 @@
   .leg-chip .ld { width: 9px; height: 9px; border-radius: 50%; flex: none; }
   .leg-chip .lp { color: var(--ink); font-weight: 700; }
   .env-rows { margin-top: 10px; display: flex; flex-direction: column; }
-  .env-row { display: grid; gap: 8px; align-items: center; padding: 5px 0; border-top: 0.5px solid color-mix(in srgb, var(--ink) 8%, transparent); }
+  .env-row { display: grid; gap: 8px; align-items: center; padding: 3px 0; border-top: 0.5px solid color-mix(in srgb, var(--ink) 8%, transparent); }
   .env-rows .env-row:first-child { border-top: 0; }
   .env-row.has-bank { grid-template-columns: minmax(0, 1fr) 116px 130px 28px; }
   .env-row.no-bank { grid-template-columns: minmax(0, 1fr) 116px 28px; }
-  .env-row input, .env-row select { width: 100%; border: 1px solid transparent; background: transparent; color: inherit; padding: 8px 9px; border-radius: 9px; font-size: 14px; transition: border-color .12s, background .12s, box-shadow .12s; }
+  .env-row input, .env-row select { width: 100%; border: 1px solid transparent; background: transparent; color: inherit; padding: 7px 9px; border-radius: 9px; font-size: 14px; transition: border-color .12s, background .12s, box-shadow .12s; }
   .env-row input:hover, .env-row select:hover { border-color: color-mix(in srgb, var(--ink) 16%, transparent); }
   .env-row input:focus, .env-row select:focus { outline: none; border-color: var(--env); background: var(--surface); box-shadow: 0 0 0 3px color-mix(in srgb, var(--env) 22%, transparent); }
   .env .add-row { width: 100%; margin: 8px 0 0; }
-  .bank-cell { position: relative; }
-  .bank-cell select { -webkit-appearance: none; appearance: none; cursor: pointer; padding-left: 27px; padding-right: 22px; }
-  .bank-cell .bank-dot { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); width: 9px; height: 9px; border-radius: 50%; pointer-events: none; }
-  .bank-cell::after { content: "▾"; position: absolute; right: 11px; top: 50%; transform: translateY(-50%); pointer-events: none; color: var(--faint); font-size: 10px; }
+  .bank-cell { position: relative; display: flex; align-items: center; background: var(--surface-2); border: 1px solid var(--line-strong); border-radius: 999px; transition: border-color .12s, box-shadow .12s; }
+  .bank-cell:hover { border-color: var(--faint); }
+  .bank-cell:focus-within { border-color: var(--env); box-shadow: 0 0 0 3px color-mix(in srgb, var(--env) 22%, transparent); }
+  .bank-cell select { -webkit-appearance: none; appearance: none; cursor: pointer; width: 100%; border: 0; background: transparent; padding: 7px 22px 7px 26px; font-size: 13px; font-weight: 600; }
+  .bank-cell select:hover, .bank-cell select:focus { border: 0; background: transparent; box-shadow: none; }
+  .bank-cell .bank-dot { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); width: 9px; height: 9px; border-radius: 50%; pointer-events: none; z-index: 1; }
+  .bank-cell::after { content: "▾"; position: absolute; right: 10px; top: 50%; transform: translateY(-50%); pointer-events: none; color: var(--faint); font-size: 10px; }
   @media (max-width: 620px) {
     .env-row.has-bank { grid-template-columns: minmax(0, 1fr) 80px 96px 24px; }
     .env-row.no-bank { grid-template-columns: minmax(0, 1fr) 88px 24px; }
@@ -489,7 +492,7 @@
     .wrap { padding-bottom: 92px; }
 
     /* Aree di tocco più grandi (~44px) */
-    .env-row input, .env-row select { padding-top: 11px; padding-bottom: 11px; }
+    .env-row input, .env-row select { padding-top: 10px; padding-bottom: 10px; }
     .month-cell { padding-top: 11px; padding-bottom: 11px; }
     .spent-cell .hsp { padding-top: 11px; padding-bottom: 11px; }
     .add-row { padding: 12px; }
