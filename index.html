@@ -166,6 +166,8 @@
   .icon-btn { width: 40px; height: 40px; border-radius: 999px; border: 1px solid var(--line-strong); background: var(--surface); color: var(--muted); display: grid; place-items: center; box-shadow: var(--shadow-sm); transition: background .15s, color .15s, border-color .15s; }
   .icon-btn:hover { color: var(--ink); border-color: var(--faint); background: var(--surface-2); }
   .icon-btn svg { width: 17px; height: 17px; }
+  .card-head .icon-btn { margin-left: auto; }
+  .icon-btn[aria-expanded="true"] { background: var(--accent); border-color: var(--accent); color: #fff; }
   .menu { position: relative; }
   .menu-pop { position: absolute; right: 0; top: calc(100% + 8px); background: var(--surface); border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow); padding: 6px; min-width: 214px; z-index: 40; display: flex; flex-direction: column; gap: 2px; }
   .menu-pop[hidden] { display: none; }
@@ -356,7 +358,9 @@
   .sugg.tip  { --tone: var(--g-fisse); --tone-soft: color-mix(in srgb, var(--g-fisse) 15%, var(--surface)); }
 
   /* Conti */
-  .acct-chips { padding: 16px 20px 20px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  .acct-chips { padding: 16px 20px 20px; display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; align-items: stretch; }
+  .chip input[type="text"] { flex: 1; min-width: 0; width: auto; }
+  .chip.add { justify-content: center; }
   .chip { display: inline-flex; align-items: center; gap: 9px; padding: 7px 10px 7px 12px; border: 1px solid var(--line-strong); border-radius: 999px; background: var(--surface-2); transition: border-color .14s; }
   .chip:hover { border-color: var(--faint); }
   .chip input { border: 0; background: transparent; width: 94px; font-size: 13.5px; font-weight: 650; padding: 2px; }
@@ -576,7 +580,7 @@
     <div class="card">
       <div class="card-head">
         <h2>Quanto tenere su ogni conto</h2>
-        <button class="hint-btn" id="acctBtn" type="button" aria-expanded="false">⚙ Gestisci conti</button>
+        <button class="icon-btn" id="acctBtn" type="button" aria-expanded="false" aria-label="Gestisci conti" title="Gestisci conti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.09A1.65 1.65 0 0 0 10 4.6V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.09a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
       </div>
       <div class="acct-list" id="acctList"></div>
     </div>
