@@ -753,10 +753,8 @@
   }
 
   // ---------- render editable rows ----------
-  function segShade(color, idx) {
-    var mix = Math.max(40, 100 - idx * 22);
-    return "color-mix(in srgb, " + color + " " + mix + "%, var(--surface))";
-  }
+  var SEGPAL = ["#2F7E6B", "#5B7B9C", "#D98C3A", "#8A6FB0", "#C25B5B", "#4E8FA6", "#A8843E", "#6E9B4E"];
+  function segShade(color, idx) { return SEGPAL[idx % SEGPAL.length]; }
 
   function renderGroups() {
     var host = document.getElementById("groups");
