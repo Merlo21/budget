@@ -424,11 +424,13 @@
   .flag.no::before { background: var(--crit); }
   .flag.none { background: var(--surface-2); color: var(--faint); }
   .flag.none::before { background: var(--faint); }
-  .hist-sum { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 16px; padding: 15px 20px 4px; border-top: 1px solid var(--line); margin-top: 6px; font-size: 13px; }
+  .hist-sum { display: flex; flex-direction: column; gap: 8px; padding: 15px 20px 4px; border-top: 1px solid var(--line); margin-top: 6px; font-size: 13px; }
+  .hs-row { display: flex; align-items: baseline; gap: 10px; }
   .hist-sum .hs-k { color: var(--muted); font-weight: 600; }
-  .hist-sum .hs-v { margin-left: auto; font-weight: 750; font-variant-numeric: tabular-nums; }
+  .hist-sum .hs-v { margin-left: auto; font-weight: 750; font-variant-numeric: tabular-nums; white-space: nowrap; }
   .hist-sum .hs-v.bad { color: var(--crit); }
   .hist-sum .hs-v.good { color: var(--accent-ink); }
+  .hs-streak { display: flex; align-items: center; gap: 7px; background: var(--accent-soft); color: var(--accent-ink); font-weight: 700; font-size: 14px; padding: 9px 12px; border-radius: 10px; }
   @media (max-width: 620px) {
     .hist-scroll { overflow-x: visible; }
     .hist-table { min-width: 0; padding: 4px 0 0; }
@@ -439,8 +441,7 @@
     .hist-row:not(.head) .hsc { grid-area: scost; text-align: right; font-weight: 700; }
     .hist-row:not(.head) .flag { display: none; }
     .hist-row:not(.head) .del { grid-area: del; justify-self: end; }
-    .hist-sum { padding: 14px 4px 4px; gap: 6px 12px; flex-wrap: nowrap; }
-    .hist-sum .hs-v { white-space: nowrap; }
+    .hist-sum { padding: 14px 4px 4px; }
   }
 
   @media (max-width: 1080px) {
@@ -1017,7 +1018,7 @@
       { label: "Non allocato", val: Math.max(0, libero), color: "var(--g-libero)" }
     ], entrate);
 
-    renderAlert(liberoState, libero);
+    renderAlert(liberoState, libero, entrate);
     renderSuggest(entrate, fisse, risparmi, svago, buffer, libero);
     renderAcctList();
     updateHistoryComputed();
@@ -1132,15 +1133,18 @@
     });
   }
 
-  function renderAlert(stateName, libero) {
+  function renderAlert(stateName, libero, entrate) {
     var slot = document.getElementById("alertSlot");
+    var svg = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5"/><path d="M12 16h.01"/></svg>';
+    if (!entrate || entrate <= 0) {
+      slot.innerHTML = '<div class="banner ok">' + svg + '<span><b>Ciao!</b> Inizia dalla scheda <b>«Il mese»</b>: inserisci il tuo stipendio e le spese. Qui vedrai subito come si divide.</span></div>';
+      return;
+    }
     var msg, cls;
     if (stateName === "ok") { cls = "ok"; msg = "<b>Budget in pareggio.</b> Ogni euro dello stipendio ha una destinazione."; }
     else if (stateName === "warn") { cls = "warn"; msg = "<b>" + eur(libero) + " ancora liberi.</b> Puoi aumentare risparmi, investimenti o lo svago."; }
     else { cls = "bad"; msg = "<b>Hai sforato di " + eur(Math.abs(libero)) + ".</b> Le uscite superano lo stipendio: riduci qualche voce."; }
-    slot.innerHTML = '<div class="banner ' + cls + '">' +
-      '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5"/><path d="M12 16h.01"/></svg>' +
-      '<span>' + msg + '</span></div>';
+    slot.innerHTML = '<div class="banner ' + cls + '">' + svg + '<span>' + msg + '</span></div>';
   }
 
   function renderAcctList() {
@@ -1304,18 +1308,26 @@
     var el = document.getElementById("histSum");
     if (!el) return;
     if (obiettivo == null) obiettivo = planRisparmio();
-    var withReal = state.history.filter(hasReal);
+    var withReal = state.history.filter(hasReal).slice().sort(function (a, b) { return (a.ym || "").localeCompare(b.ym || ""); });
     var n = withReal.length;
     if (n === 0) {
-      el.innerHTML = state.history.length ? '<span class="hs-k">Inserisci quanto hai messo via per vedere l\'esito.</span>' : "";
+      el.innerHTML = state.history.length ? '<div class="hs-row"><span class="hs-k">Inserisci quanto hai messo via per vedere l\'esito.</span></div>' : "";
       return;
     }
-    var ok = 0, saldo = 0;
-    withReal.forEach(function (h) { var d = Number(h.saved) - obiettivo; saldo += d; if (d >= -0.5) ok++; });
+    var ok = 0, saldo = 0, totale = 0;
+    withReal.forEach(function (h) { var s = Number(h.saved); totale += s; var d = s - obiettivo; saldo += d; if (d >= -0.5) ok++; });
+    var streak = 0;
+    for (var i = withReal.length - 1; i >= 0; i--) { if (Number(withReal[i].saved) - obiettivo >= -0.5) streak++; else break; }
     var cls = saldo >= -0.5 ? "good" : "bad";
+    var streakHtml = "";
+    if (streak >= 2) streakHtml = '<div class="hs-streak">🔥 <b>' + streak + '</b> mesi di fila mantenuti</div>';
+    else if (streak === 1) streakHtml = '<div class="hs-streak">🔥 serie avviata: <b>1</b> mese</div>';
     el.innerHTML =
-      '<span class="hs-k"><b>' + ok + '</b> su <b>' + n + '</b> mantenute</span>' +
-      '<span class="hs-v ' + cls + '">obiettivo ' + (saldo > 0 ? "+" : "") + eur(saldo) + '</span>';
+      streakHtml +
+      '<div class="hs-row"><span class="hs-k"><b>' + ok + '</b> su <b>' + n + '</b> mantenute</span>' +
+      '<span class="hs-v ' + cls + '">obiettivo ' + (saldo > 0 ? "+" : "") + eur(saldo) + '</span></div>' +
+      '<div class="hs-row"><span class="hs-k">Totale messo via</span>' +
+      '<span class="hs-v good">' + eur(totale) + '</span></div>';
   }
 
   // ---------- backup: export / import ----------
@@ -1388,7 +1400,11 @@
   var TAB_KEY = "budget-tab";
   var tabsEl = document.getElementById("tabs");
   function setTab(name) {
-    tabsEl.querySelectorAll(".tab").forEach(function (b) { b.classList.toggle("active", b.dataset.tab === name); });
+    tabsEl.querySelectorAll(".tab").forEach(function (b) {
+      var on = b.dataset.tab === name;
+      b.classList.toggle("active", on);
+      if (on) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current");
+    });
     document.querySelectorAll(".panel").forEach(function (p) { p.classList.toggle("active", p.dataset.panel === name); });
     try { localStorage.setItem(TAB_KEY, name); } catch (e) {}
   }
