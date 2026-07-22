@@ -294,15 +294,18 @@
   .env-ico svg { width: 20px; height: 20px; }
   .env-name { font-weight: 700; font-size: 14.5px; }
   .env-tot { margin-left: auto; font-weight: 750; font-size: 18px; }
-  .env-quota { display: flex; align-items: center; gap: 10px; margin-top: 11px; }
-  .qbar { flex: 1; height: 6px; border-radius: 99px; background: var(--surface); overflow: hidden; }
-  .qbar > span { display: block; height: 100%; width: 0; border-radius: 99px; background: var(--env); transition: width .55s cubic-bezier(.2,.7,.2,1); }
-  .qpct { font-size: 12px; font-weight: 700; color: var(--muted); min-width: 32px; text-align: right; }
-  .env-rows { margin-top: 8px; display: flex; flex-direction: column; }
-  .env-row { display: grid; gap: 8px; align-items: center; padding: 4px 0; border-top: 0.5px solid color-mix(in srgb, var(--ink) 8%, transparent); }
+  .env-seg { display: flex; height: 8px; border-radius: 99px; overflow: hidden; background: var(--surface); margin-top: 11px; }
+  .env-seg > span { flex: none; width: 0; height: 100%; transition: width .55s cubic-bezier(.2,.7,.2,1); }
+  .env-seg > span + span { box-shadow: -1.5px 0 0 var(--surface); }
+  .env-legend { display: flex; flex-wrap: wrap; gap: 5px 12px; margin-top: 10px; font-size: 12px; color: var(--muted); }
+  .leg-chip { display: inline-flex; align-items: center; gap: 5px; }
+  .leg-chip .ld { width: 9px; height: 9px; border-radius: 50%; flex: none; }
+  .leg-chip .lp { color: var(--ink); font-weight: 700; }
+  .env-rows { margin-top: 10px; display: flex; flex-direction: column; }
+  .env-row { display: grid; gap: 8px; align-items: center; padding: 5px 0; border-top: 0.5px solid color-mix(in srgb, var(--ink) 8%, transparent); }
   .env-rows .env-row:first-child { border-top: 0; }
-  .env-row.has-bank { grid-template-columns: 1fr 100px 40px 128px 28px; }
-  .env-row.no-bank { grid-template-columns: 1fr 100px 40px 28px; }
+  .env-row.has-bank { grid-template-columns: minmax(0, 1fr) 116px 130px 28px; }
+  .env-row.no-bank { grid-template-columns: minmax(0, 1fr) 116px 28px; }
   .env-row input, .env-row select { width: 100%; border: 1px solid transparent; background: transparent; color: inherit; padding: 8px 9px; border-radius: 9px; font-size: 14px; transition: border-color .12s, background .12s, box-shadow .12s; }
   .env-row input:hover, .env-row select:hover { border-color: color-mix(in srgb, var(--ink) 16%, transparent); }
   .env-row input:focus, .env-row select:focus { outline: none; border-color: var(--env); background: var(--surface); box-shadow: 0 0 0 3px color-mix(in srgb, var(--env) 22%, transparent); }
@@ -312,17 +315,8 @@
   .bank-cell .bank-dot { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); width: 9px; height: 9px; border-radius: 50%; pointer-events: none; }
   .bank-cell::after { content: "▾"; position: absolute; right: 11px; top: 50%; transform: translateY(-50%); pointer-events: none; color: var(--faint); font-size: 10px; }
   @media (max-width: 620px) {
-    .env-row.has-bank { grid-template-columns: 96px 40px 1fr 28px; grid-template-areas: "nm nm nm nm" "amt pct bank del"; row-gap: 6px; }
-    .env-row.has-bank .nm { grid-area: nm; }
-    .env-row.has-bank .amt-cell { grid-area: amt; }
-    .env-row.has-bank .rpct { grid-area: pct; text-align: left; padding-left: 2px; }
-    .env-row.has-bank .bank-cell { grid-area: bank; }
-    .env-row.has-bank .del { grid-area: del; justify-self: end; }
-    .env-row.no-bank { grid-template-columns: 1fr 44px 28px; grid-template-areas: "nm nm nm" "amt pct del"; row-gap: 6px; }
-    .env-row.no-bank .nm { grid-area: nm; }
-    .env-row.no-bank .amt-cell { grid-area: amt; }
-    .env-row.no-bank .rpct { grid-area: pct; }
-    .env-row.no-bank .del { grid-area: del; justify-self: end; }
+    .env-row.has-bank { grid-template-columns: minmax(0, 1fr) 80px 96px 24px; }
+    .env-row.no-bank { grid-template-columns: minmax(0, 1fr) 88px 24px; }
   }
 
   /* Donut / analisi */
@@ -756,6 +750,11 @@
   }
 
   // ---------- render editable rows ----------
+  function segShade(color, idx) {
+    var mix = Math.max(40, 100 - idx * 22);
+    return "color-mix(in srgb, " + color + " " + mix + "%, var(--surface))";
+  }
+
   function renderGroups() {
     var host = document.getElementById("groups");
     host.innerHTML = "";
@@ -776,14 +775,31 @@
         '<span class="env-tot num" data-gtot="' + g.id + '"></span>';
       env.appendChild(head);
 
-      var quota = document.createElement("div");
-      quota.className = "env-quota";
-      quota.innerHTML = '<div class="qbar"><span data-qbar="' + g.id + '"></span></div><span class="qpct" data-qpct="' + g.id + '"></span>';
-      env.appendChild(quota);
+      var items = state.items[g.id] || [];
+
+      var seg = document.createElement("div");
+      seg.className = "env-seg";
+      items.forEach(function (it, idx) {
+        var s = document.createElement("span");
+        s.setAttribute("data-seg-id", it.id);
+        s.style.background = segShade(g.color, idx);
+        seg.appendChild(s);
+      });
+      env.appendChild(seg);
+
+      var leg = document.createElement("div");
+      leg.className = "env-legend";
+      items.forEach(function (it, idx) {
+        var chip = document.createElement("span");
+        chip.className = "leg-chip"; chip.setAttribute("data-leg-id", it.id);
+        chip.innerHTML = '<span class="ld" style="background:' + segShade(g.color, idx) + '"></span><span class="ln"></span> <b class="lp"></b>';
+        leg.appendChild(chip);
+      });
+      env.appendChild(leg);
 
       var rows = document.createElement("div");
       rows.className = "env-rows";
-      (state.items[g.id] || []).forEach(function (it) { rows.appendChild(makeRow(g, it)); });
+      items.forEach(function (it) { rows.appendChild(makeRow(g, it)); });
       env.appendChild(rows);
       syncEmpty(rows, g);
 
@@ -793,11 +809,9 @@
       add.addEventListener("click", function () {
         var it = { id: nid("i"), name: "", amount: 0, acct: g.acct ? (state.accounts[0] ? state.accounts[0].id : null) : null };
         state.items[g.id].push(it);
-        rows.appendChild(makeRow(g, it));
-        syncEmpty(rows, g);
-        save(); recompute();
-        var inp = rows.lastChild.querySelector("input.nm");
-        if (inp) inp.focus();
+        save(); renderGroups(); recompute();
+        var el = document.querySelector('.env-row[data-id="' + it.id + '"] input.nm');
+        if (el) el.focus();
       });
       env.appendChild(add);
       if (g.id === "entrate") host.appendChild(env);
@@ -843,10 +857,6 @@
     var cur = document.createElement("span"); cur.className = "cur"; cur.textContent = "€";
     amtCell.appendChild(cur);
     row.appendChild(amtCell);
-
-    var pctc = document.createElement("span");
-    pctc.className = "rpct"; pctc.setAttribute("data-pct-id", it.id);
-    row.appendChild(pctc);
 
     if (g.acct) {
       var cell = document.createElement("div");
@@ -962,17 +972,17 @@
     var libero = entrate - usciteTot;
 
     GROUPS.forEach(function (g) {
-      var tot = groupTotal(g.id);
       var el = document.querySelector('[data-gtot="' + g.id + '"]');
-      if (el) animateEur(el, "g-" + g.id, tot);
-      var pctv = entrate > 0 ? tot / entrate * 100 : 0;
-      var bar = document.querySelector('[data-qbar="' + g.id + '"]');
-      if (bar) bar.style.width = Math.min(100, pctv).toFixed(1) + "%";
-      var qp = document.querySelector('[data-qpct="' + g.id + '"]');
-      if (qp) qp.textContent = Math.round(pctv) + "%";
+      if (el) animateEur(el, "g-" + g.id, groupTotal(g.id));
       (state.items[g.id] || []).forEach(function (it) {
-        var rp = document.querySelector('.rpct[data-pct-id="' + it.id + '"]');
-        if (rp) rp.textContent = entrate > 0 ? Math.round((Number(it.amount) || 0) / entrate * 100) + "%" : "";
+        var pv = entrate > 0 ? (Number(it.amount) || 0) / entrate * 100 : 0;
+        var s = document.querySelector('[data-seg-id="' + it.id + '"]');
+        if (s) s.style.width = pv.toFixed(2) + "%";
+        var chip = document.querySelector('.leg-chip[data-leg-id="' + it.id + '"]');
+        if (chip) {
+          chip.querySelector(".ln").textContent = it.name || (g.kind === "in" ? "Entrata" : "Voce");
+          chip.querySelector(".lp").textContent = Math.round(pv) + "%";
+        }
       });
     });
 
