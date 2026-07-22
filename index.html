@@ -753,8 +753,10 @@
   }
 
   // ---------- render editable rows ----------
-  var SEGPAL = ["#2F7E6B", "#5B7B9C", "#D98C3A", "#8A6FB0", "#C25B5B", "#4E8FA6", "#A8843E", "#6E9B4E"];
-  function segShade(color, idx) { return SEGPAL[idx % SEGPAL.length]; }
+  function voceColor(g, it) {
+    if (it.acct) { var a = acctById(it.acct); if (a) return a.color; }
+    return g.color;
+  }
 
   function renderGroups() {
     var host = document.getElementById("groups");
@@ -780,20 +782,20 @@
 
       var seg = document.createElement("div");
       seg.className = "env-seg";
-      items.forEach(function (it, idx) {
+      items.forEach(function (it) {
         var s = document.createElement("span");
         s.setAttribute("data-seg-id", it.id);
-        s.style.background = segShade(g.color, idx);
+        s.style.background = voceColor(g, it);
         seg.appendChild(s);
       });
       env.appendChild(seg);
 
       var leg = document.createElement("div");
       leg.className = "env-legend";
-      items.forEach(function (it, idx) {
+      items.forEach(function (it) {
         var chip = document.createElement("span");
         chip.className = "leg-chip"; chip.setAttribute("data-leg-id", it.id);
-        chip.innerHTML = '<span class="ld" style="background:' + segShade(g.color, idx) + '"></span><span class="ln"></span> <b class="lp"></b>';
+        chip.innerHTML = '<span class="ld" style="background:' + voceColor(g, it) + '"></span><span class="ln"></span> <b class="lp"></b>';
         leg.appendChild(chip);
       });
       env.appendChild(leg);
@@ -977,10 +979,12 @@
       if (el) animateEur(el, "g-" + g.id, groupTotal(g.id));
       (state.items[g.id] || []).forEach(function (it) {
         var pv = entrate > 0 ? (Number(it.amount) || 0) / entrate * 100 : 0;
+        var col = voceColor(g, it);
         var s = document.querySelector('[data-seg-id="' + it.id + '"]');
-        if (s) s.style.width = pv.toFixed(2) + "%";
+        if (s) { s.style.width = pv.toFixed(2) + "%"; s.style.background = col; }
         var chip = document.querySelector('.leg-chip[data-leg-id="' + it.id + '"]');
         if (chip) {
+          var ld = chip.querySelector(".ld"); if (ld) ld.style.background = col;
           chip.querySelector(".ln").textContent = it.name || (g.kind === "in" ? "Entrata" : "Voce");
           chip.querySelector(".lp").textContent = Math.round(pv) + "%";
         }
